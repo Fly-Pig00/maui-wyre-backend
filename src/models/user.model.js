@@ -44,6 +44,14 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    userId: {
+      type: String,
+      required: true,
+    },
+    ethWalletAddr: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,
