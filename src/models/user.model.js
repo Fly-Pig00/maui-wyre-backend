@@ -52,6 +52,12 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    payMethods: [
+      {
+        ref: 'PayMethod',
+        type: mongoose.Schema.Types.ObjectId,
+      },
+    ],
   },
   {
     timestamps: true,

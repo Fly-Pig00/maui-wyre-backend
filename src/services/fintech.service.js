@@ -2,12 +2,20 @@ const axios = require('axios');
 const config = require('../config/config');
 
 const getWyreUserInfo = async (userId) => {
-  const response = await axios({
+  let response;
+  await axios({
     method: 'GET',
     headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
     url: `${config.wyre.url}/v3/users/${userId}`,
-  });
-  return response.data;
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
 };
 
 const orderReservation = async (ethWalletAddr, userId, sourceAmount, paymentMethod) => {
@@ -142,10 +150,186 @@ const getKYCUrl = async (userId) => {
   return response;
 };
 
+const createPaymentMethod = async (
+  firstNameOnAccount,
+  lastNameOnAccount,
+  beneficiaryAddress,
+  beneficiaryCity,
+  beneficiaryPostal,
+  beneficiaryPhoneNumber,
+  beneficaryState,
+  beneficiaryDobDay,
+  beneficiaryDobMonth,
+  beneficiaryDobYear,
+  accountNumber,
+  routingNumber,
+  accountType
+) => {
+  const input = {
+    paymentMethodType: 'INTERNATIONAL_TRANSFER',
+    paymentType: 'LOCAL_BANK_WIRE',
+    currency: 'USD',
+    country: 'US',
+    beneficiaryType: 'INDIVIDUAL',
+    firstNameOnAccount,
+    lastNameOnAccount,
+    beneficiaryAddress,
+    beneficiaryCity,
+    beneficiaryPostal,
+    beneficiaryPhoneNumber,
+    beneficaryState,
+    beneficiaryDobDay,
+    beneficiaryDobMonth,
+    beneficiaryDobYear,
+    accountNumber,
+    routingNumber,
+    accountType: accountType === 0 ? 'CHECKING' : 'SAVINGS',
+    chargeablePM: false,
+  };
+
+  let response;
+  await axios({
+    method: 'POST',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v2/paymentMethods`,
+    data: input,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
+const removePaymentMethod = async (srn) => {
+  let response;
+  await axios({
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v2/paymentMethod/${srn}`,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
+const transferFromPaymentMethod = async (srn, sourceAmount, sourceCurrency, userId) => {
+  const input = {
+    source: `paymentmethod:${srn}`,
+    dest: `user:${userId}`,
+    sourceCurrency,
+    destCurrency: 'USD',
+    sourceAmount,
+    autoConfirm: true,
+  };
+  let response;
+  await axios({
+    method: 'POST',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v3/transfers`,
+    data: input,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
+const getCryptoFromPaymentMethod = async (srn, sourceAmount, sourceCurrency, ethWalletAddr) => {
+  const input = {
+    source: `paymentmethod:${srn}`,
+    dest: `ethereum:${ethWalletAddr}`,
+    sourceCurrency,
+    destCurrency: 'DAI',
+    sourceAmount,
+    autoConfirm: true,
+  };
+  let response;
+  await axios({
+    method: 'POST',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v3/transfers`,
+    data: input,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
+const getPayMethodStatus = async (srn) => {
+  const status = await axios({
+    method: 'GET',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v2/paymentMethod/${srn}`,
+  });
+
+  return status.data.status;
+};
+
+const uploadBankDoc = async (srn, formData) => {
+  let response;
+  await axios
+    .post({
+      method: 'POST',
+      headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+      url: `${config.wyre.url}/v2/paymentMethod/${srn}/followup`,
+      formData,
+    })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
+const getBalances = async (userId) => {
+  let response;
+  await axios({
+    method: 'GET',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v3/users/${userId}`,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data.totalBalances };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
 module.exports = {
   getWyreUserInfo,
   orderReservation,
   createOrder,
   createWyreUser,
   getKYCUrl,
+  createPaymentMethod,
+  transferFromPaymentMethod,
+  getCryptoFromPaymentMethod,
+  getPayMethodStatus,
+  uploadBankDoc,
+  removePaymentMethod,
+  getBalances,
 };

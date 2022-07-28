@@ -5,18 +5,23 @@ const { authService, userService, tokenService, emailService, fintechService } =
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   const tokens = await tokenService.generateAuthTokens(user);
-  const wyreUser = await fintechService.getWyreUserInfo(user.userId);
+  const wyreUser = await fintechService.createWyreUser();
 
   res.status(httpStatus.CREATED).send({ user, tokens, wyreUser });
 });
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
+
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const wyreUser = await fintechService.getWyreUserInfo(user.userId);
-
+  if (wyreUser.status === 'error') {
+    res.status(httpStatus.BAD_REQUEST).send(wyreUser.data);
+    return;
+  }
   const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens, wyreUser });
+
+  res.send({ user, tokens, wyreUser: wyreUser.data });
 });
 
 const logout = catchAsync(async (req, res) => {

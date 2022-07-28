@@ -10,6 +10,22 @@ router.route('/reserve').post(auth(), validate(fintechValidation.reserveOrder), 
 
 router.route('/order').post(auth(), fintechController.createOrder);
 
+router
+  .route('/createpaymethod')
+  .post(auth(), validate(fintechValidation.transferFromBankAccount), fintechController.createBankPayMethod);
+
+router.route('/deletepaymethod').post(auth(), fintechController.deletePayMethod);
+
+router.route('/fiatfrombank').post(auth(), fintechController.transferFromPaymethod);
+
+router.route('/cryptofrombank').post(auth(), fintechController.getCrytpFromPaymethod);
+
+router.route('/uploaddoc').post(auth(), fintechController.uploadDoc);
+
 router.route('/kyc').get(auth(), fintechController.processKYC);
+
+router.route('/getpaymethods').get(auth(), fintechController.getPayMethods);
+
+router.route('/balances').get(auth(), fintechController.getBalance);
 
 module.exports = router;
