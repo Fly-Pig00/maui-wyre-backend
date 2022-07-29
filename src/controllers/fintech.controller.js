@@ -4,9 +4,16 @@ const { fintechService } = require('../services');
 const { User, PayMethod } = require('../models');
 
 const reserveOrder = catchAsync(async (req, res) => {
-  const { amount, paymentMethod } = req.body;
+  const { amount, paymentMethod, sourceCurrency, destCurrency } = req.body;
 
-  const response = await fintechService.orderReservation(req.user.ethWalletAddr, req.user.userId, amount, paymentMethod);
+  const response = await fintechService.orderReservation(
+    sourceCurrency,
+    destCurrency,
+    req.user.ethWalletAddr,
+    req.user.userId,
+    amount,
+    paymentMethod
+  );
 
   if (response.status === 'success') {
     res.send(response.data);
@@ -17,6 +24,8 @@ const reserveOrder = catchAsync(async (req, res) => {
 
 const createOrder = catchAsync(async (req, res) => {
   const {
+    sourceCurrency,
+    destCurrency,
     number,
     year,
     month,
@@ -34,6 +43,8 @@ const createOrder = catchAsync(async (req, res) => {
     phone,
   } = req.body;
   const response = await fintechService.createOrder(
+    sourceCurrency,
+    destCurrency,
     number,
     year,
     month,
@@ -67,9 +78,15 @@ const processKYC = catchAsync(async (req, res) => {
   }
 });
 
-const transferFromPaymethod = catchAsync(async (req, res) => {
-  const { srn, sourceAmount, sourceCurrency } = req.body;
-  const response = await fintechService.transferFromPaymentMethod(srn, sourceAmount, sourceCurrency, req.user.userId);
+const getFiatFromPaymethod = catchAsync(async (req, res) => {
+  const { srn, sourceAmount, sourceCurrency, destCurrency } = req.body;
+  const response = await fintechService.getFiatFromPaymentMethod(
+    srn,
+    sourceAmount,
+    sourceCurrency,
+    destCurrency,
+    req.user.userId
+  );
   if (response.status === 'success') {
     res.send(response.data);
   } else {
@@ -78,11 +95,12 @@ const transferFromPaymethod = catchAsync(async (req, res) => {
 });
 
 const getCrytpFromPaymethod = catchAsync(async (req, res) => {
-  const { srn, sourceAmount, sourceCurrency } = req.body;
+  const { srn, sourceAmount, sourceCurrency, destCurrency } = req.body;
   const response = await fintechService.getCryptoFromPaymentMethod(
     srn,
     sourceAmount,
     sourceCurrency,
+    destCurrency,
     req.user.ethWalletAddr
   );
   if (response.status === 'success') {
@@ -215,15 +233,26 @@ const getBalance = catchAsync(async (req, res) => {
   }
 });
 
+const getUserInfo = catchAsync(async (req, res) => {
+  const wyreUser = await fintechService.getWyreUserInfo(req.user.userId);
+  if (wyreUser.status === 'error') {
+    res.status(httpStatus.BAD_REQUEST).send(wyreUser.data);
+    return;
+  }
+
+  res.send({ user: req.user, wyreUser: wyreUser.data });
+});
+
 module.exports = {
   reserveOrder,
   createOrder,
   processKYC,
   createBankPayMethod,
-  transferFromPaymethod,
+  getFiatFromPaymethod,
   getPayMethods,
   uploadDoc,
   deletePayMethod,
   getCrytpFromPaymethod,
   getBalance,
+  getUserInfo,
 };

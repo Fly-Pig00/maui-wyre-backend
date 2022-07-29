@@ -2,6 +2,8 @@ const Joi = require('joi');
 
 const reserveOrder = {
   body: Joi.object().keys({
+    sourceCurrency: Joi.string().required(),
+    destCurrency: Joi.string().required(),
     amount: Joi.number().min(0).required(),
     paymentMethod: Joi.number().required().min(0).max(2),
   }),
@@ -9,6 +11,8 @@ const reserveOrder = {
 
 const transferFromBankAccount = {
   body: Joi.object().keys({
+    sourceCurrency: Joi.string().required(),
+    destCurrency: Joi.string().required(),
     firstNameOnAccount: Joi.string().required(),
     lastNameOnAccount: Joi.string().required(),
     beneficiaryAddress: Joi.string().required(),

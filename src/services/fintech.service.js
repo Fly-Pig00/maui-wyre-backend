@@ -18,7 +18,7 @@ const getWyreUserInfo = async (userId) => {
   return response;
 };
 
-const orderReservation = async (ethWalletAddr, userId, sourceAmount, paymentMethod) => {
+const orderReservation = async (sourceCurrency, destCurrency, ethWalletAddr, userId, sourceAmount, paymentMethod) => {
   let payMethod;
   if (paymentMethod === 0) {
     payMethod = 'debit-card';
@@ -32,8 +32,8 @@ const orderReservation = async (ethWalletAddr, userId, sourceAmount, paymentMeth
     sourceAmount,
     paymentMethod: payMethod,
     amountIncludeFees: true,
-    sourceCurrency: 'USD',
-    destCurrency: 'DAI',
+    sourceCurrency,
+    destCurrency,
     referrerAccountId: config.wyre.referrerAccountId,
     dest: `ethereum:${ethWalletAddr}`,
     country: 'US',
@@ -58,6 +58,8 @@ const orderReservation = async (ethWalletAddr, userId, sourceAmount, paymentMeth
 };
 
 const createOrder = async (
+  sourceCurrency,
+  destCurrency,
   number,
   year,
   month,
@@ -84,8 +86,8 @@ const createOrder = async (
     },
     reservationId,
     amount,
-    sourceCurrency: 'USD',
-    destCurrency: 'DAI',
+    sourceCurrency: sourceCurrency,
+    destCurrency: destCurrency,
     dest: `ethereum:${ethWalletAddr}`,
     referrerAccountId: config.wyre.referrerAccountId,
     givenName,
@@ -221,12 +223,12 @@ const removePaymentMethod = async (srn) => {
   return response;
 };
 
-const transferFromPaymentMethod = async (srn, sourceAmount, sourceCurrency, userId) => {
+const getFiatFromPaymentMethod = async (srn, sourceAmount, sourceCurrency, destCurrency, userId) => {
   const input = {
     source: `paymentmethod:${srn}`,
     dest: `user:${userId}`,
     sourceCurrency,
-    destCurrency: 'USD',
+    destCurrency,
     sourceAmount,
     autoConfirm: true,
   };
@@ -247,12 +249,12 @@ const transferFromPaymentMethod = async (srn, sourceAmount, sourceCurrency, user
   return response;
 };
 
-const getCryptoFromPaymentMethod = async (srn, sourceAmount, sourceCurrency, ethWalletAddr) => {
+const getCryptoFromPaymentMethod = async (srn, sourceAmount, sourceCurrency, destCurrency, ethWalletAddr) => {
   const input = {
     source: `paymentmethod:${srn}`,
     dest: `ethereum:${ethWalletAddr}`,
     sourceCurrency,
-    destCurrency: 'DAI',
+    destCurrency,
     sourceAmount,
     autoConfirm: true,
   };
@@ -326,7 +328,7 @@ module.exports = {
   createWyreUser,
   getKYCUrl,
   createPaymentMethod,
-  transferFromPaymentMethod,
+  getFiatFromPaymentMethod,
   getCryptoFromPaymentMethod,
   getPayMethodStatus,
   uploadBankDoc,

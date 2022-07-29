@@ -16,7 +16,7 @@ router
 
 router.route('/deletepaymethod').post(auth(), fintechController.deletePayMethod);
 
-router.route('/fiatfrombank').post(auth(), fintechController.transferFromPaymethod);
+router.route('/fiatfrombank').post(auth(), fintechController.getFiatFromPaymethod);
 
 router.route('/cryptofrombank').post(auth(), fintechController.getCrytpFromPaymethod);
 
@@ -27,5 +27,7 @@ router.route('/kyc').get(auth(), fintechController.processKYC);
 router.route('/getpaymethods').get(auth(), fintechController.getPayMethods);
 
 router.route('/balances').get(auth(), fintechController.getBalance);
+
+router.route('/userinfo').get(auth(), fintechController.getUserInfo);
 
 module.exports = router;
