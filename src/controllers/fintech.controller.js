@@ -2,6 +2,8 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { fintechService } = require('../services');
 const { User, PayMethod } = require('../models');
+const fs = require('fs/promises');
+const FormData = require('form-data');
 
 const reserveOrder = catchAsync(async (req, res) => {
   const { amount, paymentMethod, sourceCurrency, destCurrency } = req.body;
@@ -78,6 +80,16 @@ const processKYC = catchAsync(async (req, res) => {
   }
 });
 
+const withdrawFromFiat = catchAsync(async (req, res) => {
+  const { srn, sourceAmount, sourceCurrency, destCurrency } = req.body;
+  const response = await fintechService.withdrawFromFiat(srn, sourceAmount, sourceCurrency, destCurrency, req.user.userId);
+  if (response.status === 'success') {
+    res.send(response.data);
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send({ msg: response.data });
+  }
+});
+
 const getFiatFromPaymethod = catchAsync(async (req, res) => {
   const { srn, sourceAmount, sourceCurrency, destCurrency } = req.body;
   const response = await fintechService.getFiatFromPaymentMethod(
@@ -86,6 +98,22 @@ const getFiatFromPaymethod = catchAsync(async (req, res) => {
     sourceCurrency,
     destCurrency,
     req.user.userId
+  );
+  if (response.status === 'success') {
+    res.send(response.data);
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send({ msg: response.data });
+  }
+});
+
+const withdrawFromCrypto = catchAsync(async (req, res) => {
+  const { srn, sourceAmount, sourceCurrency, destCurrency } = req.body;
+  const response = await fintechService.withdrawFromCrypto(
+    srn,
+    sourceAmount,
+    sourceCurrency,
+    destCurrency,
+    req.user.ethWalletAddr
   );
   if (response.status === 'success') {
     res.send(response.data);
@@ -215,8 +243,16 @@ const getPayMethods = catchAsync(async (req, res) => {
 });
 
 const uploadDoc = catchAsync(async (req, res) => {
+  const file = req.file;
+  console.log('file: ', file);
+  const uploadedFile = await fs.readFile(file.path);
+  console.log('uploadedFile: ', uploadedFile);
+  const form = new FormData();
+  form.append('document', uploadedFile, file.originalname);
+  console.log('form: ', form);
+
   const { paymentMethodId } = req.body;
-  const response = await fintechService.uploadBankDoc(paymentMethodId);
+  const response = await fintechService.uploadBankDoc('PA_22GAPLF64L9', form);
   if (response.status === 'success') {
     res.send(response.data);
   } else {
@@ -243,16 +279,39 @@ const getUserInfo = catchAsync(async (req, res) => {
   res.send({ user: req.user, wyreUser: wyreUser.data });
 });
 
+const plaidCreateToken = catchAsync(async (req, res) => {
+  const response = await fintechService.createPlaidToken(req.user.id);
+  if (response.status === 'success') {
+    res.send(response.data);
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send({ msg: response.data });
+  }
+});
+
+const plaidCreatePublicToken = catchAsync(async (req, res) => {
+  const { publicToken } = req.body;
+  const response = await fintechService.createPlaidPublicToken(publicToken);
+  if (response.status === 'success') {
+    res.send(response.data);
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send({ msg: response.data });
+  }
+});
+
 module.exports = {
   reserveOrder,
   createOrder,
   processKYC,
   createBankPayMethod,
   getFiatFromPaymethod,
+  withdrawFromCrypto,
+  withdrawFromFiat,
   getPayMethods,
   uploadDoc,
   deletePayMethod,
   getCrytpFromPaymethod,
   getBalance,
   getUserInfo,
+  plaidCreateToken,
+  plaidCreatePublicToken,
 };

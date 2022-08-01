@@ -9,10 +9,8 @@ const reserveOrder = {
   }),
 };
 
-const transferFromBankAccount = {
+const createBankPayMethod = {
   body: Joi.object().keys({
-    sourceCurrency: Joi.string().required(),
-    destCurrency: Joi.string().required(),
     firstNameOnAccount: Joi.string().required(),
     lastNameOnAccount: Joi.string().required(),
     beneficiaryAddress: Joi.string().required(),
@@ -37,5 +35,5 @@ const transferFromBankAccount = {
 
 module.exports = {
   reserveOrder,
-  transferFromBankAccount,
+  createBankPayMethod,
 };

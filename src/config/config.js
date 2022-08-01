@@ -66,4 +66,8 @@ module.exports = {
     secretKey: 'TEST-SK-XE78UJN6-2XP9X3EJ-QDJWYVXE-X364Y2BR',
     apiKey: 'TEST-AK-8F37UZU3-EJGN9FE6-4AZ3DN8U-B3Z6H8ND',
   },
+  plaid: {
+    secret: 'd2751d163de83590a8fb797a09db57',
+    clientId: '62dfe2326cdc88001a58e2ef'
+  }
 };
