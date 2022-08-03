@@ -138,6 +138,25 @@ const getCrytpFromPaymethod = catchAsync(async (req, res) => {
   }
 });
 
+const transferAsset = catchAsync(async (req, res) => {
+  const { recipient, sourceAmount, sourceCurrency, destCurrency } = req.body;
+  let destUser = await User.findOne({ email: recipient });
+  console.log(destUser);
+  if (!destUser) res.status(httpStatus.BAD_REQUEST).send({ msg: 'Not registered User' });
+  const response = await fintechService.transferAsset(
+    sourceAmount,
+    sourceCurrency,
+    destCurrency,
+    destUser.userId,
+    req.user.userId
+  );
+  if (response.status === 'success') {
+    res.send(response.data);
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send({ msg: response.data });
+  }
+});
+
 const createBankPayMethod = catchAsync(async (req, res) => {
   const {
     firstNameOnAccount,
@@ -248,7 +267,9 @@ const uploadDoc = catchAsync(async (req, res) => {
   const uploadedFile = await fs.readFile(file.path);
   console.log('uploadedFile: ', uploadedFile);
   const form = new FormData();
-  form.append('document', uploadedFile, file.originalname);
+  form.append('document', uploadedFile, {
+    contentType: 'application/pdf',
+  });
   console.log('form: ', form);
 
   const { paymentMethodId } = req.body;
@@ -307,6 +328,7 @@ module.exports = {
   withdrawFromCrypto,
   withdrawFromFiat,
   getPayMethods,
+  transferAsset,
   uploadDoc,
   deletePayMethod,
   getCrytpFromPaymethod,

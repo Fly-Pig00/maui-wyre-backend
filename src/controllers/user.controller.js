@@ -34,10 +34,17 @@ const deleteUser = catchAsync(async (req, res) => {
   res.status(httpStatus.NO_CONTENT).send();
 });
 
+const searchUser = catchAsync(async (req, res) => {
+  const { keyword } = req.body;
+  const candidates = await userService.searchUser(keyword);
+  res.send(candidates);
+});
+
 module.exports = {
   createUser,
   getUsers,
   getUser,
   updateUser,
   deleteUser,
+  searchUser,
 };

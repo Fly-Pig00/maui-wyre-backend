@@ -26,6 +26,8 @@ router.route('/withdrawfromcrypto').post(auth(), fintechController.withdrawFromC
 
 router.route('/withdrawfromfiat').post(auth(), fintechController.withdrawFromFiat);
 
+router.route('/transferasset').post(auth(), fintechController.transferAsset);
+
 router.route('/uploaddoc').post(upload.single('bankdoc'), fintechController.uploadDoc);
 
 router.route('/kyc').get(auth(), fintechController.processKYC);

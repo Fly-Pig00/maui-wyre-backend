@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const mongoose = require('mongoose');
+const { email } = require('../config/config');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { createWyreUser } = require('./fintech.service');
@@ -94,6 +95,11 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
+const searchUser = async (keyword) => {
+  const candidates = await User.find({ email: { $regex: keyword, $options: 'i' } }).select(['email']);
+  return candidates;
+};
+
 module.exports = {
   createUser,
   queryUsers,
@@ -101,4 +107,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  searchUser,
 };

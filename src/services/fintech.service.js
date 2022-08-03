@@ -329,6 +329,33 @@ const withdrawFromCrypto = async (srn, sourceAmount, sourceCurrency, destCurrenc
   return response;
 };
 
+const transferAsset = async (sourceAmount, sourceCurrency, destCurrency, dest, source) => {
+  const input = {
+    dest: `user:${dest}`,
+    source: `user:${source}`,
+    sourceCurrency,
+    destCurrency,
+    sourceAmount,
+    autoConfirm: true,
+  };
+  let response;
+  await axios({
+    method: 'POST',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v3/transfers?masqueradeAs=account:AC_MN9RTYNT34T`,
+    data: input,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      console.log(err.response.data.message);
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
 const getPayMethodStatus = async (srn) => {
   const status = await axios({
     method: 'GET',
@@ -341,10 +368,14 @@ const getPayMethodStatus = async (srn) => {
 
 const uploadBankDoc = async (srn, form) => {
   let response;
-  console.log(srn, config.wyre.url);
+  console.log(form.getHeaders());
   await axios
     .post(`${config.wyre.url}/v2/paymentMethod/${srn}/followup`, form, {
-      headers: { Authorization: `Bearer ${config.wyre.secretKey}`, ...form.getHeaders() },
+      headers: {
+        Authorization: `Bearer ${config.wyre.secretKey}`,
+        'Content-Type': 'application/pdf',
+        Accept: 'application/pdf',
+      },
     })
     .then((res) => {
       response = { status: 'success', data: res.data };
@@ -435,6 +466,7 @@ module.exports = {
   getFiatFromPaymentMethod,
   withdrawFromCrypto,
   getCryptoFromPaymentMethod,
+  transferAsset,
   getPayMethodStatus,
   uploadBankDoc,
   removePaymentMethod,
