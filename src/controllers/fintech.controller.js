@@ -157,6 +157,15 @@ const transferAsset = catchAsync(async (req, res) => {
   }
 });
 
+const getHistory = catchAsync(async (req, res) => {
+  const response = await fintechService.getHistory(req.user.userId);
+  if (response.status === 'success') {
+    res.send(response.data);
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send({ msg: response.data });
+  }
+});
+
 const createBankPayMethod = catchAsync(async (req, res) => {
   const {
     firstNameOnAccount,
@@ -332,6 +341,7 @@ module.exports = {
   uploadDoc,
   deletePayMethod,
   getCrytpFromPaymethod,
+  getHistory,
   getBalance,
   getUserInfo,
   plaidCreateToken,

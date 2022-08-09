@@ -38,6 +38,8 @@ router.route('/balances').get(auth(), fintechController.getBalance);
 
 router.route('/userinfo').get(auth(), fintechController.getUserInfo);
 
+router.route('/gethistory').get(auth(), fintechController.getHistory);
+
 router.route('/plaidtoken').get(auth(), fintechController.plaidCreateToken);
 
 router.route('/plaid_public_token').get(auth(), fintechController.plaidCreatePublicToken);

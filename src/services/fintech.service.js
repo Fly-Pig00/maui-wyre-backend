@@ -356,6 +356,23 @@ const transferAsset = async (sourceAmount, sourceCurrency, destCurrency, dest, s
   return response;
 };
 
+const getHistory = async (userId) => {
+  let response;
+  await axios({
+    method: 'GET',
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v2/transfers/user:${userId}`,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      console.log(err.response.data.message);
+      response = { status: 'error', data: err.response.data.message };
+    });
+  return response;
+};
+
 const getPayMethodStatus = async (srn) => {
   const status = await axios({
     method: 'GET',
@@ -467,6 +484,7 @@ module.exports = {
   withdrawFromCrypto,
   getCryptoFromPaymentMethod,
   transferAsset,
+  getHistory,
   getPayMethodStatus,
   uploadBankDoc,
   removePaymentMethod,
