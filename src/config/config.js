@@ -67,7 +67,13 @@ module.exports = {
     apiKey: 'TEST-AK-8F37UZU3-EJGN9FE6-4AZ3DN8U-B3Z6H8ND',
   },
   plaid: {
-    secret: 'd2751d163de83590a8fb797a09db57',
-    clientId: '62dfe2326cdc88001a58e2ef'
-  }
+    secret: 'f6822d0e2c7816641d20127585b233',
+    clientId: '62f1f56b97d5700014286c61',
+    plaidEnv: 'sandbox',
+    // product: 'payment_initiation',
+    product: 'auth,transactions',
+    countryCode: 'GB',
+    redirectUri: '',
+    androidPackageName: '',
+  },
 };
