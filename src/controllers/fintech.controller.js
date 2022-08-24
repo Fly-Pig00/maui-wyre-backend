@@ -139,15 +139,21 @@ const getCrytpFromPaymethod = catchAsync(async (req, res) => {
 });
 
 const transferAsset = catchAsync(async (req, res) => {
-  const { recipient, sourceAmount, sourceCurrency, destCurrency } = req.body;
-  let destUser = await User.findOne({ email: recipient });
-  console.log(destUser);
-  if (!destUser) res.status(httpStatus.BAD_REQUEST).send({ msg: 'Not registered User' });
+  const { method, recipient, sourceAmount, sourceCurrency, destCurrency } = req.body;
+  // if(method==="user")
+  let destUser;
+  console.log(method);
+  if (method === 'user') {
+    destUser = await User.findOne({ email: recipient });
+    console.log(destUser);
+    if (!destUser) res.status(httpStatus.BAD_REQUEST).send({ msg: 'Not registered User' });
+  }
   const response = await fintechService.transferAsset(
+    method,
     sourceAmount,
     sourceCurrency,
     destCurrency,
-    destUser.userId,
+    method === 'user' ? destUser.userId : recipient,
     req.user.userId
   );
   if (response.status === 'success') {
@@ -277,12 +283,12 @@ const uploadDoc = catchAsync(async (req, res) => {
   console.log('uploadedFile: ', uploadedFile);
   const form = new FormData();
   form.append('document', uploadedFile, {
-    contentType: 'application/pdf',
+    'content-type': 'application/pdf',
   });
   console.log('form: ', form);
 
   const { paymentMethodId } = req.body;
-  const response = await fintechService.uploadBankDoc('PA_22GAPLF64L9', form);
+  const response = await fintechService.uploadBankDoc('PA_TJQ78QZRLMP', form);
   if (response.status === 'success') {
     res.send(response.data);
   } else {

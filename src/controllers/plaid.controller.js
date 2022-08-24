@@ -97,7 +97,8 @@ const createLinkToken = catchAsync(async (req, res, next) => {
 
 const setProcessorToken = catchAsync(async (req, res, next) => {
   PUBLIC_TOKEN = req.body.public_token;
-  let accountID = req.body.accountID;
+  let accountId = req.body.accountId;
+  console.log(PUBLIC_TOKEN, accountId);
   Promise.resolve()
     .then(async function () {
       const tokenResponse = await client.itemPublicTokenExchange({
@@ -107,9 +108,10 @@ const setProcessorToken = catchAsync(async (req, res, next) => {
       // // Create a processor token for a specific account id.
       const request = {
         access_token: accessToken,
-        account_id: accountID,
-        processor: 'dwolla',
+        account_id: accountId,
+        processor: 'wyre',
       };
+      console.log(request);
       const processorTokenResponse = await client.processorTokenCreate(request);
       console.log(processorTokenResponse);
       const processorToken = processorTokenResponse.data.processor_token;

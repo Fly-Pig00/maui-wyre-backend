@@ -329,15 +329,16 @@ const withdrawFromCrypto = async (srn, sourceAmount, sourceCurrency, destCurrenc
   return response;
 };
 
-const transferAsset = async (sourceAmount, sourceCurrency, destCurrency, dest, source) => {
+const transferAsset = async (method, sourceAmount, sourceCurrency, destCurrency, dest, source) => {
   const input = {
-    dest: `user:${dest}`,
+    dest: method === 'user' ? `user:${dest}` : `ethereum:${dest}`,
     source: `user:${source}`,
     sourceCurrency,
     destCurrency,
     sourceAmount,
     autoConfirm: true,
   };
+  console.log(input);
   let response;
   await axios({
     method: 'POST',
@@ -391,10 +392,12 @@ const uploadBankDoc = async (srn, form) => {
       headers: {
         Authorization: `Bearer ${config.wyre.secretKey}`,
         'Content-Type': 'application/pdf',
-        Accept: 'application/pdf',
+        Accept: 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
     })
     .then((res) => {
+      console.log('');
       response = { status: 'success', data: res.data };
     })
     .catch((err) => {
