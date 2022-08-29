@@ -278,17 +278,16 @@ const getPayMethods = catchAsync(async (req, res) => {
 
 const uploadDoc = catchAsync(async (req, res) => {
   const file = req.file;
+  console.log(req.file);
+  const { srn } = req.body;
   console.log('file: ', file);
   const uploadedFile = await fs.readFile(file.path);
-  console.log('uploadedFile: ', uploadedFile);
   const form = new FormData();
-  form.append('document', uploadedFile, {
-    'content-type': 'application/pdf',
-  });
-  console.log('form: ', form);
+  // form.append('document', file, {
+  //   'content-type': 'application/pdf',
+  // });
 
-  const { paymentMethodId } = req.body;
-  const response = await fintechService.uploadBankDoc('PA_TJQ78QZRLMP', form);
+  const response = await fintechService.uploadBankDoc(srn, file);
   if (response.status === 'success') {
     res.send(response.data);
   } else {

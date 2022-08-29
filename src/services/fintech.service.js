@@ -385,8 +385,9 @@ const getPayMethodStatus = async (srn) => {
 };
 
 const uploadBankDoc = async (srn, form) => {
+  console.log('object', srn);
   let response;
-  console.log(form.getHeaders());
+  // console.log(form.getHeaders());
   await axios
     .post(`${config.wyre.url}/v2/paymentMethod/${srn}/followup`, form, {
       headers: {
@@ -397,7 +398,7 @@ const uploadBankDoc = async (srn, form) => {
       },
     })
     .then((res) => {
-      console.log('');
+      console.log('res', res.data);
       response = { status: 'success', data: res.data };
     })
     .catch((err) => {
