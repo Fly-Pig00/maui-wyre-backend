@@ -5,6 +5,15 @@ const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 
+//Google Login
+const loginUserWithGoogleEmail = async (email, password) => {
+  const user = await userService.getUserByEmail(email);
+  if (!user) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email');
+  }
+  return user;
+};
+
 /**
  * Login with username and password
  * @param {string} email
@@ -91,6 +100,7 @@ const verifyEmail = async (verifyEmailToken) => {
 };
 
 module.exports = {
+  loginUserWithGoogleEmail,
   loginUserWithEmailAndPassword,
   logout,
   refreshAuth,

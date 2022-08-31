@@ -76,4 +76,8 @@ module.exports = {
     redirectUri: '',
     androidPackageName: '',
   },
+  google: {
+    clientId: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET
+  }
 };
