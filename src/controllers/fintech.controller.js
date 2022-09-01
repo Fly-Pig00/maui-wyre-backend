@@ -24,8 +24,28 @@ const reserveOrder = catchAsync(async (req, res) => {
   }
 });
 
+const reserveOrderForFiat = catchAsync(async (req, res) => {
+  const { amount, paymentMethod, sourceCurrency, destCurrency } = req.body;
+
+  const response = await fintechService.orderReservationForFiat(
+    sourceCurrency,
+    destCurrency,
+    req.user.ethWalletAddr,
+    req.user.userId,
+    amount,
+    paymentMethod
+  );
+
+  if (response.status === 'success') {
+    res.send(response.data);
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send({ msg: response.data });
+  }
+});
+
 const createOrder = catchAsync(async (req, res) => {
   const {
+    isFiat,
     sourceCurrency,
     destCurrency,
     number,
@@ -45,6 +65,7 @@ const createOrder = catchAsync(async (req, res) => {
     phone,
   } = req.body;
   const response = await fintechService.createOrder(
+    isFiat,
     sourceCurrency,
     destCurrency,
     number,
@@ -62,7 +83,8 @@ const createOrder = catchAsync(async (req, res) => {
     familyName,
     email,
     phone,
-    req.user.ethWalletAddr
+    req.user.ethWalletAddr,
+    req.user.userId
   );
   if (response.status === 'success') {
     res.send(response.data);
@@ -335,6 +357,7 @@ const plaidCreatePublicToken = catchAsync(async (req, res) => {
 
 module.exports = {
   reserveOrder,
+  reserveOrderForFiat,
   createOrder,
   processKYC,
   createBankPayMethod,
