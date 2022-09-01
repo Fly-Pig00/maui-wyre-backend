@@ -41,7 +41,8 @@ const orderReservation = async (sourceCurrency, destCurrency, ethWalletAddr, use
     country: 'US',
     owner: `user:${userId}`,
   };
-
+  console.log('-------------order reservation---------------');
+  console.log(input);
   let response;
   await axios({
     method: 'POST',
@@ -150,7 +151,8 @@ const createOrder = async (
     },
   };
   let response;
-
+  console.log('-------------create order---------------');
+  console.log(input);
   await axios({
     method: 'POST',
     data: input,
@@ -381,7 +383,6 @@ const transferAsset = async (method, sourceAmount, sourceCurrency, destCurrency,
     sourceAmount,
     autoConfirm: true,
   };
-  console.log(input);
   let response;
   await axios({
     method: 'POST',

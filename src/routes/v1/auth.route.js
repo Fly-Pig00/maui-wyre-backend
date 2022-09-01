@@ -2,6 +2,7 @@ const express = require('express');
 const validate = require('../../middlewares/validate');
 const authValidation = require('../../validations/auth.validation');
 const authController = require('../../controllers/auth.controller');
+const passport = require('passport');
 const auth = require('../../middlewares/auth');
 
 const router = express.Router();
@@ -14,6 +15,23 @@ router.post('/forgot-password', validate(authValidation.forgotPassword), authCon
 router.post('/reset-password', validate(authValidation.resetPassword), authController.resetPassword);
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authValidation.verifyEmail), authController.verifyEmail);
+
+//Google auth
+router.post('/google-login', authController.googleLogin);
+// router.get('/google',
+//   passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+// router.get('/google/callback',
+//   passport.authenticate('google',
+//     {
+//       successRedirect: 'http://localhost:3000/dashboard',
+//       failureRedirect: 'http://localhost:3000/singin'
+//     }
+//   ),
+//   function (req, res) {
+//     // Successful authentication, redirect success.
+//     res.redirect('/success');
+//   });
 
 module.exports = router;
 
