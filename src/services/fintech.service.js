@@ -60,7 +60,49 @@ const orderReservation = async (sourceCurrency, destCurrency, btcWalletAddr, eth
   return response;
 };
 
+const orderReservationForFiat = async (sourceCurrency, destCurrency, ethWalletAddr, userId, sourceAmount, paymentMethod) => {
+  let payMethod;
+  if (paymentMethod === 0) {
+    payMethod = 'debit-card';
+  } else if (paymentMethod === 1) {
+    payMethod = 'ach-transfer';
+  } else {
+    payMethod = 'apple-pay';
+  }
+
+  const input = {
+    sourceAmount,
+    paymentMethod: payMethod,
+    amountIncludeFees: true,
+    sourceCurrency,
+    destCurrency,
+    referrerAccountId: config.wyre.referrerAccountId,
+    dest: `user:${userId}`,
+    country: 'US',
+    owner: `user:${userId}`,
+  };
+
+  console.log(input);
+
+  let response;
+  await axios({
+    method: 'POST',
+    data: input,
+    headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+    url: `${config.wyre.url}/v3/orders/reserve`,
+  })
+    .then((res) => {
+      response = { status: 'success', data: res.data };
+    })
+    .catch((err) => {
+      response = { status: 'error', data: err.response.data.message };
+    });
+
+  return response;
+};
+
 const createOrder = async (
+  isFiat,
   sourceCurrency,
   destCurrency,
   number,
@@ -79,7 +121,8 @@ const createOrder = async (
   email,
   phone,
   btcWalletAddr,
-  ethWalletAddr
+  ethWalletAddr,
+  userId
 ) => {
   const input = {
     debitCard: {
@@ -92,7 +135,7 @@ const createOrder = async (
     amount,
     sourceCurrency: sourceCurrency,
     destCurrency: destCurrency,
-    dest: destCurrency === 'BTC' ? `bitcoin:${btcWalletAddr}` : `ethereum:${ethWalletAddr}`,
+    dest: isFiat ? `user:${userId}` : destCurrency === 'BTC' ? `bitcoin:${btcWalletAddr}` : `ethereum:${ethWalletAddr}`,
     referrerAccountId: config.wyre.referrerAccountId,
     givenName,
     familyName,
@@ -483,6 +526,7 @@ const createPlaidPublicToken = async (publicToken) => {
 module.exports = {
   getWyreUserInfo,
   orderReservation,
+  orderReservationForFiat,
   createOrder,
   createWyreUser,
   getKYCUrl,

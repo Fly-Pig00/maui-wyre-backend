@@ -10,6 +10,10 @@ const router = express.Router();
 
 router.route('/reserve').post(auth(), validate(fintechValidation.reserveOrder), fintechController.reserveOrder);
 
+router
+  .route('/reserveforfiat')
+  .post(auth(), validate(fintechValidation.reserveOrder), fintechController.reserveOrderForFiat);
+
 router.route('/order').post(auth(), fintechController.createOrder);
 
 router
