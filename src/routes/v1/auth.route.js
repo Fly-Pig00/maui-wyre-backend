@@ -18,20 +18,7 @@ router.post('/verify-email', validate(authValidation.verifyEmail), authControlle
 
 //Google auth
 router.post('/google-login', authController.googleLogin);
-// router.get('/google',
-//   passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-// router.get('/google/callback',
-//   passport.authenticate('google',
-//     {
-//       successRedirect: 'http://localhost:3000/dashboard',
-//       failureRedirect: 'http://localhost:3000/singin'
-//     }
-//   ),
-//   function (req, res) {
-//     // Successful authentication, redirect success.
-//     res.redirect('/success');
-//   });
+router.post('/google-signup', authController.googleSignUp);
 
 module.exports = router;
 
