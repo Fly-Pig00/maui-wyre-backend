@@ -83,6 +83,7 @@ const createOrder = catchAsync(async (req, res) => {
     familyName,
     email,
     phone,
+    req.user.btcWalletAddr,
     req.user.ethWalletAddr,
     req.user.userId
   );

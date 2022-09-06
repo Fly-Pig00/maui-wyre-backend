@@ -52,6 +52,10 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    btcWalletAddr: {
+      type: String,
+      required: true,
+    },
     payMethods: [
       {
         ref: 'PayMethod',

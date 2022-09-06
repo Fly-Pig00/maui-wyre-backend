@@ -20,7 +20,7 @@ const getWyreUserInfo = async (userId) => {
   return response;
 };
 
-const orderReservation = async (sourceCurrency, destCurrency, ethWalletAddr, userId, sourceAmount, paymentMethod) => {
+const orderReservation = async (sourceCurrency, destCurrency, btcWalletAddr, ethWalletAddr, userId, sourceAmount, paymentMethod) => {
   let payMethod;
   if (paymentMethod === 0) {
     payMethod = 'debit-card';
@@ -37,11 +37,11 @@ const orderReservation = async (sourceCurrency, destCurrency, ethWalletAddr, use
     sourceCurrency,
     destCurrency,
     referrerAccountId: config.wyre.referrerAccountId,
-    dest: `ethereum:${ethWalletAddr}`,
+    dest: destCurrency === 'BTC' ? `bitcoin:${btcWalletAddr}` : `ethereum:${ethWalletAddr}`,
     country: 'US',
     owner: `user:${userId}`,
   };
-  console.log('-------------order reservation---------------');
+  console.log('-------------orderReservation---------------');
   console.log(input);
   let response;
   await axios({
@@ -120,6 +120,7 @@ const createOrder = async (
   familyName,
   email,
   phone,
+  btcWalletAddr,
   ethWalletAddr,
   userId
 ) => {
@@ -134,7 +135,7 @@ const createOrder = async (
     amount,
     sourceCurrency: sourceCurrency,
     destCurrency: destCurrency,
-    dest: isFiat ? `user:${userId}` : `ethereum:${ethWalletAddr}`,
+    dest: isFiat ? `user:${userId}` : destCurrency === 'BTC' ? `bitcoin:${btcWalletAddr}` : `ethereum:${ethWalletAddr}`,
     referrerAccountId: config.wyre.referrerAccountId,
     givenName,
     familyName,
@@ -171,7 +172,7 @@ const createOrder = async (
 
 const createWyreUser = async () => {
   const input = {
-    blockchains: ['ETH'],
+    blockchains: ['ETH', 'BTC'],
   };
   const response = await axios({
     method: 'POST',
@@ -385,10 +386,12 @@ const transferAsset = async (method, sourceAmount, sourceCurrency, destCurrency,
     autoConfirm: true,
   };
   let response;
+  console.log('------------------------transferAsset-----------------------');
+  console.log(input)
   await axios({
     method: 'POST',
     headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
-    url: `${config.wyre.url}/v3/transfers?masqueradeAs=account:AC_MN9RTYNT34T`,
+    url: `${config.wyre.url}/v3/transfers?masqueradeAs=user:${source}`,
     data: input,
   })
     .then((res) => {
