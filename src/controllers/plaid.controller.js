@@ -144,10 +144,6 @@ const setProcessorToken = catchAsync(async (req, res, next) => {
           url: `${config.wyre.url}/v2/paymentMethods`,
           data: input,
         }).then(async paymethod => {
-          console.log({
-            name: paymethod.data.name,
-            srn: paymethod.data.srn.split(':')[1],
-          }, req.user.id);
           const payMethod = new PayMethod({
             name: paymethod.data.name,
             srn: paymethod.data.srn.split(':')[1],
