@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const axios = require("axios");
 const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
 const util = require('util');
 const config = require('../config/config');
@@ -96,40 +97,114 @@ const createLinkToken = catchAsync(async (req, res, next) => {
 });
 
 const setProcessorToken = catchAsync(async (req, res, next) => {
-  PUBLIC_TOKEN = req.body.public_token;
-  let accountId = req.body.accountId;
-  console.log(PUBLIC_TOKEN, accountId);
+  // PUBLIC_TOKEN = req.body.public_token;
+  let PUBLIC_TOKEN;
+  let accessToken;
+  let accountId;
+  let processorToken;
+
+  await axios.post("https://sandbox.plaid.com/sandbox/public_token/create", {
+    client_id: PLAID_CLIENT_ID,
+    secret: PLAID_SECRET,
+    institution_id: "ins_3",
+    "initial_products": ["auth"],
+  }).then(res => PUBLIC_TOKEN = res.data.public_token).catch(err => console.log(err));
+
+  await axios.post("https://sandbox.plaid.com/item/public_token/exchange", {
+    client_id: PLAID_CLIENT_ID,
+    secret: PLAID_SECRET,
+    public_token: PUBLIC_TOKEN
+  }).then(res => { accessToken = res.data.access_token }).catch(err => console.log(err));
+
+  await axios.post("https://sandbox.plaid.com/auth/get", {
+    client_id: PLAID_CLIENT_ID,
+    secret: PLAID_SECRET,
+    access_token: accessToken
+  }).then(res => { accountId = res.data.accounts[0].account_id }).catch(err => console.log(err));
+
   Promise.resolve()
     .then(async function () {
-      const tokenResponse = await client.itemPublicTokenExchange({
-        public_token: PUBLIC_TOKEN,
-      });
-      const accessToken = tokenResponse.data.access_token;
-      // // Create a processor token for a specific account id.
-      const request = {
+      await axios.post("https://sandbox.plaid.com/processor/token/create", {
+        client_id: PLAID_CLIENT_ID,
+        secret: PLAID_SECRET,
         access_token: accessToken,
         account_id: accountId,
-        processor: 'wyre',
-      };
-      console.log(request);
-      const processorTokenResponse = await client.processorTokenCreate(request);
-      console.log(processorTokenResponse);
-      const processorToken = processorTokenResponse.data.processor_token;
+        processor: "wyre"
 
-      // const tokenResponse = await client.itemPublicTokenExchange({
-      //   public_token: PUBLIC_TOKEN,
+      }).then(async (response) => {
+        processorToken = response.data.processor_token;
+        const input = {
+          country: "US",
+          paymentMethodType: "LOCAL_TRANSFER",
+          plaidProcessorToken: processorToken
+        }
+        await axios({
+          method: 'POST',
+          headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+          url: `${config.wyre.url}/v2/paymentMethods`,
+          data: input,
+        }).then(async paymethod => {
+          console.log({
+            name: paymethod.data.name,
+            srn: paymethod.data.srn.split(':')[1],
+          }, req.user.id);
+          const payMethod = new PayMethod({
+            name: paymethod.data.name,
+            srn: paymethod.data.srn.split(':')[1],
+          });
+          await payMethod
+            .save()
+            .then((method) => {
+              User.findById(req.user.id)
+                .then((user) => {
+                  user.payMethods.push(method._id);
+                  user
+                    .save()
+                    .then(() => {
+                      res.send({ ...paymethod.data, payId: method._id });
+                    })
+                    .catch(() => {
+                      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ msg: 'DB save of user info fails' });
+                    });
+                })
+                .catch(() => {
+                  res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ msg: 'No such a usr data' });
+                });
+            })
+            .catch(() => {
+              res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ msg: 'DB save of pay info fails' });
+            });
+        })
+      }).catch(err => {
+        console.log(err.response.data);
+        res.status(400).json({ message: "create token failed" })
+      })
+
+      // const request = {
+      //   access_token: accessToken,
+      //   account_id: accountId,
+      //   processor: 'wyre',
+      // };
+      // console.log(request);
+
+      // const processorTokenResponse = await client.processorTokenCreate(request);
+      // console.log(processorTokenResponse);
+      // // const processorToken = processorTokenResponse.data.processor_token;
+
+      // // const tokenResponse = await client.itemPublicTokenExchange({
+      // //   public_token: PUBLIC_TOKEN,
+      // // });
+      // prettyPrintResponse(tokenResponse);
+      // ACCESS_TOKEN = tokenResponse.data.access_token;
+      // ITEM_ID = tokenResponse.data.item_id;
+      // if (PLAID_PRODUCTS.includes('transfer')) {
+      //   TRANSFER_ID = await authorizeAndCreateTransfer(ACCESS_TOKEN);
+      // }
+      // res.json({
+      //   access_token: ACCESS_TOKEN,
+      //   item_id: ITEM_ID,
+      //   error: null,
       // });
-      prettyPrintResponse(tokenResponse);
-      ACCESS_TOKEN = tokenResponse.data.access_token;
-      ITEM_ID = tokenResponse.data.item_id;
-      if (PLAID_PRODUCTS.includes('transfer')) {
-        TRANSFER_ID = await authorizeAndCreateTransfer(ACCESS_TOKEN);
-      }
-      res.json({
-        access_token: ACCESS_TOKEN,
-        item_id: ITEM_ID,
-        error: null,
-      });
     })
     .catch(next);
 });

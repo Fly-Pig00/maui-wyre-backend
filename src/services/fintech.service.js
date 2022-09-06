@@ -244,6 +244,7 @@ const createPaymentMethod = async (
     data: input,
   })
     .then((res) => {
+      console.log(res.data);
       response = { status: 'success', data: res.data };
     })
     .catch((err) => {
