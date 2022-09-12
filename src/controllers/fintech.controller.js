@@ -11,6 +11,7 @@ const reserveOrder = catchAsync(async (req, res) => {
   const response = await fintechService.orderReservation(
     sourceCurrency,
     destCurrency,
+    req.user.btcWalletAddr,
     req.user.ethWalletAddr,
     req.user.userId,
     amount,
