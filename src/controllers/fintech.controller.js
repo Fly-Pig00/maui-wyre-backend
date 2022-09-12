@@ -268,9 +268,11 @@ const deletePayMethod = catchAsync(async (req, res) => {
   if (response.status === 'success') {
     await PayMethod.findOneAndDelete({ srn }).then((payMethod) => {
       User.findById(req.user.id).then((user) => {
+        console.log(payMethod._id)
         const filteredPayMethods = user.payMethods.filter((item) => {
-          return item.toString() !== payMethod._id.toString();
+          return item.toString().toLowerCase() !== payMethod._id.toString().toLowerCase();
         });
+        console.log(filteredPayMethods)
 
         user
           .save({ ...user, payMethods: filteredPayMethods })
