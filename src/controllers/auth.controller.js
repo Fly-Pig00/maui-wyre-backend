@@ -11,13 +11,16 @@ const googleClient = new OAuth2Client({
 });
 
 const googleLogin = catchAsync(async (req, res) => {
-  const { token } = req.body;
-  const ticket = await googleClient.verifyIdToken({
-    idToken: token,
-    requiredAudience: `${config.google.clientId}`,
-  });
-  const payload = ticket.getPayload();
-  const user = await authService.loginUserWithGoogleEmail(payload?.email);
+
+  // const { token } = req.body;
+  // const ticket = await googleClient.verifyIdToken({
+  //   idToken: token,
+  //   requiredAudience: `${config.google.clientId}`,
+  // });
+  // const payload = ticket.getPayload();
+
+  const { email } = req.body;
+  const user = await authService.loginUserWithGoogleEmail(email);
   const wyreUser = await fintechService.getWyreUserInfo(user.userId);
   if (wyreUser.status === 'error') {
     res.status(httpStatus.BAD_REQUEST).send(wyreUser.data);
@@ -28,13 +31,14 @@ const googleLogin = catchAsync(async (req, res) => {
 });
 
 const googleSignUp = catchAsync(async (req, res) => {
-  const { token } = req.body;
-  const ticket = await googleClient.verifyIdToken({
-    idToken: token,
-    requiredAudience: `${config.google.clientId}`,
-  });
-  const payload = ticket.getPayload();
-  const user = await userService.createUser({ email: payload?.email, password: 'abc111##', name: payload?.name });
+  // const { token } = req.body;
+  // const ticket = await googleClient.verifyIdToken({
+  //   idToken: token,
+  //   requiredAudience: `${config.google.clientId}`,
+  // });
+  // const payload = ticket.getPayload();
+  const { email, name } = req.body;
+  const user = await userService.createUser({ email, password: 'abc111##', name });
   const tokens = await tokenService.generateAuthTokens(user);
   const wyreUser = await fintechService.createWyreUser();
 
@@ -45,7 +49,7 @@ const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   const tokens = await tokenService.generateAuthTokens(user);
   const wyreUser = await fintechService.createWyreUser();
-
+  console.log("---------------registered-------------------")
   res.status(httpStatus.CREATED).send({ user, tokens, wyreUser });
 });
 
