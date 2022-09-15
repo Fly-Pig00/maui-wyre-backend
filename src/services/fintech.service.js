@@ -183,6 +183,19 @@ const createWyreUser = async () => {
   return response.data;
 };
 
+// const UpdateWyreUser = async () => {
+//   const input = {
+//     blockchains: ['ALL'],
+//   };
+//   const response = await axios({
+//     method: 'POST',
+//     data: input,
+//     headers: { Authorization: `Bearer ${config.wyre.secretKey}` },
+//     url: 'https://api.testwyre.com/v3/US_U9AEEA7XJTA',
+//   });
+//   return response.data;
+// }
+
 const getKYCUrl = async (userId) => {
   let response;
   await axios({

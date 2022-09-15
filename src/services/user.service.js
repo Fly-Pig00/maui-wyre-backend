@@ -20,8 +20,6 @@ const createUser = async (userBody) => {
 
   if (!wyreUser) throw new ApiError(httpStatus.SERVICE_UNAVAILABLE, 'create wyre user fail');
 
-  console.log(wyreUser)
-
   const body = {
     ...userBody,
     _id: id,

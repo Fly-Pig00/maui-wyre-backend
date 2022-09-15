@@ -27,18 +27,14 @@ const googleLogin = catchAsync(async (req, res) => {
     return;
   }
   const tokens = await tokenService.generateAuthTokens(user);
+  console.log(wyreUser)
   res.send({ user, tokens, wyreUser: wyreUser.data });
 });
 
 const googleSignUp = catchAsync(async (req, res) => {
-  // const { token } = req.body;
-  // const ticket = await googleClient.verifyIdToken({
-  //   idToken: token,
-  //   requiredAudience: `${config.google.clientId}`,
-  // });
-  // const payload = ticket.getPayload();
-  const { email, name } = req.body;
-  const user = await userService.createUser({ email, password: 'abc111##', name });
+
+  const { email, name, firstName, lastName } = req.body;
+  const user = await userService.createUser({ email, name, firstName, lastName });
   const tokens = await tokenService.generateAuthTokens(user);
   const wyreUser = await fintechService.createWyreUser();
 
@@ -49,7 +45,6 @@ const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   const tokens = await tokenService.generateAuthTokens(user);
   const wyreUser = await fintechService.createWyreUser();
-  console.log("---------------registered-------------------")
   res.status(httpStatus.CREATED).send({ user, tokens, wyreUser });
 });
 
