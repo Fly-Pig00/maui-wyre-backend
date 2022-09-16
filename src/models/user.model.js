@@ -25,7 +25,7 @@ const userSchema = mongoose.Schema(
     },
     password: {
       type: String,
-      // required: true,
+      required: true,
       trim: true,
       minlength: 8,
       validate(value) {
@@ -54,12 +54,12 @@ const userSchema = mongoose.Schema(
     },
     btcWalletAddr: {
       type: String,
-      //  required: true,
+      //required: true,
     },
     firstName: {
       type: String,
       default: '',
-      // required: true,
+      //  required: true,
     },
     lastName: {
       type: String,
@@ -69,7 +69,7 @@ const userSchema = mongoose.Schema(
     dateOfBirth: {
       type: String,
       default: '',
-      //  required: true,
+      //required: true,
     },
     country: {
       type: String,

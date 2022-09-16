@@ -33,8 +33,8 @@ const googleLogin = catchAsync(async (req, res) => {
 
 const googleSignUp = catchAsync(async (req, res) => {
 
-  const { email, name, firstName, lastName } = req.body;
-  const user = await userService.createUser({ email, name, firstName, lastName });
+  const { email, name, password, firstName, lastName } = req.body;
+  const user = await userService.createUser({ email, name, password: 'a' + password, firstName, lastName });
   const tokens = await tokenService.generateAuthTokens(user);
   const wyreUser = await fintechService.createWyreUser();
 
